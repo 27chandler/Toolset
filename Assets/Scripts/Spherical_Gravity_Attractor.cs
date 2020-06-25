@@ -5,15 +5,31 @@ using UnityEngine;
 public class Spherical_Gravity_Attractor : MonoBehaviour
 {
     [SerializeField] private float strength;
+    //
+    private Rigidbody own_rb;
+    private float mass;
     [SerializeField] private List<Rigidbody> physics_objects = new List<Rigidbody>();
     // Start is called before the first frame update
     void Start()
     {
+        own_rb = GetComponent<Rigidbody>();
+        if (own_rb != null)
+        {
+            mass = own_rb.mass;
+        }
+        else
+        {
+            mass = 999999.0f;
+        }
+
         Rigidbody[] temp_objects = FindObjectsOfType(typeof(Rigidbody)) as Rigidbody[];
 
         foreach (var obj in temp_objects)
         {
-            physics_objects.Add(obj);
+            if (obj != own_rb)
+            {
+                physics_objects.Add(obj);
+            }
         }
     }
 
@@ -22,7 +38,9 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
     {
         foreach (var rb in physics_objects)
         {
-            float gravity_force = (1.0f / Vector3.Distance(transform.position,rb.position)) * Time.deltaTime * strength;
+            //forceSun = G x(massPlanet x massSun) / d ^ 2;
+
+            float gravity_force = (1.0f * (rb.mass * mass) / (Mathf.Pow(Vector3.Distance(transform.position, rb.position), 2)));
             Vector3 gravity_direction = Vector3.Normalize(transform.position - rb.position);
 
             rb.AddForce(gravity_direction * gravity_force);
