@@ -8,7 +8,13 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
     //
     private Rigidbody own_rb;
     private float mass;
-    [SerializeField] private List<Rigidbody> physics_objects = new List<Rigidbody>();
+    [SerializeField] private List<Physics_Objects> physics_objects = new List<Physics_Objects>();
+
+    public class Physics_Objects
+    {
+        public Rigidbody rb;
+        public Gyroscope gyro;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -28,7 +34,12 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
         {
             if (obj != own_rb)
             {
-                physics_objects.Add(obj);
+                Physics_Objects new_obj = new Physics_Objects();
+                new_obj.rb = obj;
+
+                new_obj.gyro = obj.gameObject.GetComponent<Gyroscope>();
+
+                physics_objects.Add(new_obj);
             }
         }
     }
@@ -36,14 +47,19 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        foreach (var rb in physics_objects)
+        foreach (var physics_object in physics_objects)
         {
             //forceSun = G x(massPlanet x massSun) / d ^ 2;
 
-            float gravity_force = (1.0f * (rb.mass * mass) / (Mathf.Pow(Vector3.Distance(transform.position, rb.position), 2)));
-            Vector3 gravity_direction = Vector3.Normalize(transform.position - rb.position);
+            float gravity_force = (1.0f * (physics_object.rb.mass * mass) / (Mathf.Pow(Vector3.Distance(transform.position, physics_object.rb.position), 2)));
+            Vector3 gravity_direction = Vector3.Normalize(transform.position - physics_object.rb.position);
 
-            rb.AddForce(gravity_direction * gravity_force);
+            physics_object.rb.AddForce(gravity_direction * gravity_force);
+
+            if (physics_object.gyro != null)
+            {
+                physics_object.gyro.Add_Gravity(gravity_direction * gravity_force);
+            }
         }
     }
 }
