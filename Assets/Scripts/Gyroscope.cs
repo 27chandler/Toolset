@@ -6,6 +6,7 @@ using UnityEngine;
 public class Gyroscope : MonoBehaviour
 {
     [SerializeField] private Vector3 face_direction;
+    [SerializeField] private Vector3 offset;
     private Rigidbody rb;
 
     private Vector3 gravity;
@@ -26,7 +27,10 @@ public class Gyroscope : MonoBehaviour
         face_direction = gravity;
         Vector3 rotate_dir = transform.up - face_direction;
 
-        rb.MoveRotation(Quaternion.LookRotation(face_direction));
+        //rb.MoveRotation(Quaternion.LookRotation(face_direction));
+
+        Quaternion to_rotation = Quaternion.FromToRotation(-transform.up, face_direction) * transform.rotation;
+        transform.rotation = to_rotation;
 
         //Reset gravity direction
         gravity = Vector3.zero;

@@ -10,6 +10,8 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
     private float mass;
     [SerializeField] private List<Physics_Objects> physics_objects = new List<Physics_Objects>();
 
+    private List<Vector3> gravity_sources = new List<Vector3>();
+
     public class Physics_Objects
     {
         public Rigidbody rb;
@@ -43,10 +45,10 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
             }
         }
     }
-
     // Update is called once per frame
     void Update()
     {
+        gravity_sources.Clear();
         foreach (var physics_object in physics_objects)
         {
             //forceSun = G x(massPlanet x massSun) / d ^ 2;
@@ -55,11 +57,20 @@ public class Spherical_Gravity_Attractor : MonoBehaviour
             Vector3 gravity_direction = Vector3.Normalize(transform.position - physics_object.rb.position);
 
             physics_object.rb.AddForce(gravity_direction * gravity_force);
+            gravity_sources.Add(gravity_direction * gravity_force);
 
             if (physics_object.gyro != null)
             {
                 physics_object.gyro.Add_Gravity(gravity_direction * gravity_force);
             }
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        foreach (var gravity in gravity_sources)
+        {
+            Gizmos.DrawLine(transform.position, transform.position + gravity);
         }
     }
 }
